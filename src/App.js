@@ -1,25 +1,60 @@
-import logo from './logo.svg';
-import './App.css';
+import {useEffect, useState} from "react"
+import "./App.css"
+import {getMovieList, searchMovie} from "./lib/api"
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+   const [popularMovies, setPopularMovies] = useState([])
+   useEffect(() => {
+      getMovieList().then((result) => {
+         setPopularMovies(result)
+      })
+   }, [])
+
+   const PopularMoviesList = () => {
+      return popularMovies.map((movie, i) => {
+         return (
+            <div className="movie-wrapper" key={i}>
+               <div className="movie-title">{movie.title}</div>
+               <img
+                  className="movie-poster"
+                  src={`${process.env.REACT_APP_BASEIMAGEURL}/${movie.poster_path}`}
+                  alt="movie-poster"
+               />
+               <div className="movie-info">
+                  <div className="movie-date">
+                     release : {movie.release_date}
+                  </div>
+                  <div className="movie-rate">{movie.vote_average}</div>
+               </div>
+            </div>
+         )
+      })
+   }
+   const search = async (q) => {
+      if (q.length > 3) {
+         const query = await searchMovie(q)
+         setPopularMovies(query.results)
+      }
+   }
+
+   console.log({popularMovies: popularMovies})
+
+   return (
+      <div className="App">
+         <header className="App-header">
+            <h1>Aldybala Movies Mania</h1>
+            <input
+               type="text"
+               placeholder="Search for a movie"
+               className="movie-search"
+               onChange={(e) => search(e.target.value)}
+            />
+            <div className="movie-container">
+               <PopularMoviesList />
+            </div>
+         </header>
+      </div>
+   )
 }
 
-export default App;
+export default App
